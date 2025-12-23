@@ -24,6 +24,5 @@ perspectiveSelect.addEventListener('change', (event) => {
     const target = event.target as HTMLSelectElement
     canvas.perspective = target.value as PerspectiveView
     canvas.clear()
-    canvas.perspective = target.value as PerspectiveView
-    canvas.line(new Point(0, 0, 0), new Point(100, 100, 100))
+    canvas.drawAxes(150)
 })

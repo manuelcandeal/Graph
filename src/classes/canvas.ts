@@ -46,7 +46,7 @@ export class Canvas {
         point2D = p.orthographic()
         break
       case 'perspective':
-        point2D = p.perspective(100)
+        point2D = p.perspective(300)
         break
       default:
         point2D = p.isometric()
@@ -91,4 +91,29 @@ export class Canvas {
             y: this.canvas.height/2 - y
         }
     }
+
+  drawAxes(length: number = 100) {
+    const origin = new Point(0, 0, 0)
+    const xEnd = new Point(length, 0, 0)
+    const yEnd = new Point(0, length, 0)
+    const zEnd = new Point(0, 0, length)
+
+    // Guardar el color original
+    const originalColor = this.context.strokeStyle
+
+    // Eix X (vermell)
+    this.context.strokeStyle = '#ff0000'
+    this.line(origin, xEnd)
+
+    // Eix Y (verd)
+    this.context.strokeStyle = '#00ff00'
+    this.line(origin, yEnd)
+
+    // Eix Z (blau)
+    this.context.strokeStyle = '#0000ff'
+    this.line(origin, zEnd)
+
+    // Restaurar el color original
+    this.context.strokeStyle = originalColor
+  }
 }
