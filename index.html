@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/ico" href="/images/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zs3 Graph</title>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <img class="logo" src="/images/logo.png" alt="Zs3 Logo" />
+        <div class="title"><h1>Zs3 Graph</h1></div>
+        <select class="perspective-select">
+          <option value="none" selected>Select...</option>
+          <option value="isometric">Isometric</option>
+          <option value="perspective">Perspective</option>
+          <option value="orthographic">Orthographic</option>
+        </select>
+      </div>
+        <canvas class="canvas"></canvas>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

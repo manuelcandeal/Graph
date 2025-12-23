@@ -1,0 +1,13 @@
+# Directoris
+dist/
+node_modules/
+.git/
+
+# Fitxers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build
+*.min.js
+*.min.css
