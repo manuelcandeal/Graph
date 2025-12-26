@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemple Pràctic: Canvas i devicePixelRatio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .info-box {
+            background: #f0f7ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: #1976D2;
+            font-size: 1.2em;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .canvas-wrapper {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .canvas-wrapper h2 {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 1.3em;
+        }
+
+        .canvas-wrapper.wrong {
+            border: 3px solid #ff5252;
+        }
+
+        .canvas-wrapper.correct {
+            border: 3px solid #4CAF50;
+        }
+
+        canvas {
+            display: block;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge.wrong {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge.correct {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .explanation {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .explanation h3 {
+            color: #e65100;
+            margin-bottom: 10px;
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .code-section {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-section h3 {
+            color: #80deea;
+            margin-bottom: 15px;
+        }
+
+        .code-section pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Canvas i devicePixelRatio</h1>
+        <p style="color: #666; font-size: 1.1em; margin-bottom: 20px;">
+            Exemple pràctic que demostra la importància d'ajustar el canvas al devicePixelRatio
+        </p>
+
+        <!-- Informació del dispositiu -->
+        <div class="info-box">
+            <strong>devicePixelRatio del teu dispositiu: <span id="dpr-value"></span></strong>
+            <p style="margin-top: 10px; color: #555;">
+                Aquest valor indica quants píxels físics té la pantalla per cada píxel CSS.
+            </p>
+        </div>
+
+        <!-- Estadístiques -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Device Pixel Ratio</div>
+                <div class="value" id="stat-dpr">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Píxels físics (Correcte)</div>
+                <div class="value" id="stat-physical">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Píxels CSS</div>
+                <div class="value" id="stat-css">400×300</div>
+            </div>
+        </div>
+
+        <!-- Comparació Visual -->
+        <div class="comparison">
+            <!-- Canvas SENSE DPR (incorrecte) -->
+            <div class="canvas-wrapper wrong">
+                <h2>
+                    SENSE devicePixelRatio
+                    <span class="badge wrong">Borrós</span>
+                </h2>
+                <canvas id="canvas-wrong" width="400" height="300"></canvas>
+            </div>
+
+            <!-- Canvas AMB DPR (correcte) -->
+            <div class="canvas-wrapper correct">
+                <h2>
+                    AMB devicePixelRatio
+                    <span class="badge correct">Nítid</span>
+                </h2>
+                <canvas id="canvas-correct" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Explicació -->
+        <div class="explanation">
+            <h3>Per què es veu diferent?</h3>
+            <ul>
+                <li><strong>Canvas SENSE DPR:</strong> El navegador estira 400×300 píxels lògics per omplir més píxels físics, creant un efecte borrós.</li>
+                <li><strong>Canvas AMB DPR:</strong> Dibuixem en la resolució física real i després l'escalem amb CSS, mantenint la nitidesa.</li>
+                <li><strong>Pantalles Retina/HiDPI:</strong> En pantalles amb DPR ≥ 2, la diferència és molt més evident (text més nítid, línies més definides).</li>
+                <li><strong>Rendiment:</strong> Més píxels = més càlcul, però la millora visual sol compensar-ho.</li>
+            </ul>
+        </div>
+
+        <!-- Funció Reutilitzable -->
+        <div class="code-section">
+            <h3>Funció Reutilitzable per Configurar Canvas amb DPR</h3>
+            <pre>
+<span style="color: #ff9800;">/**
+ * Configura un canvas per treballar amb devicePixelRatio
+ * @param {HTMLCanvasElement} canvas - Element canvas a configurar
+ * @param {number} widthCSS - Amplada en píxels CSS
+ * @param {number} heightCSS - Alçada en píxels CSS
+ * @returns {CanvasRenderingContext2D} Context 2D escalat correctament
+ */</span>
+<span style="color: #80deea;">function</span> <span style="color: #ffeb3b;">configurarCanvasAmbDPR</span>(canvas, widthCSS, heightCSS) {
+    <span style="color: #90caf9;">const</span> dpr = window.devicePixelRatio || <span style="color: #f48fb1;">1</span>;
+
+    <span style="color: #ff9800;">// Establir la mida CSS (mida visual)</span>
+    canvas.style.width = widthCSS + <span style="color: #a5d6a7;">'px'</span>;
+    canvas.style.height = heightCSS + <span style="color: #a5d6a7;">'px'</span>;
+
+    <span style="color: #ff9800;">// Establir la mida del buffer (resolució real)</span>
+    canvas.width = widthCSS * dpr;
+    canvas.height = heightCSS * dpr;
+
+    <span style="color: #ff9800;">// Escalar el context per compensar</span>
+    <span style="color: #90caf9;">const</span> ctx = canvas.getContext(<span style="color: #a5d6a7;">'2d'</span>);
+    ctx.scale(dpr, dpr);
+
+    <span style="color: #80deea;">return</span> ctx;
+}</pre>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // MOSTRAR INFORMACIÓ DEL DISPOSITIU
+        // ============================================
+        const dpr = window.devicePixelRatio || 1;
+        document.getElementById('dpr-value').textContent = dpr;
+        document.getElementById('stat-dpr').textContent = dpr.toFixed(2);
+        document.getElementById('stat-physical').textContent = `${400 * dpr}×${300 * dpr}`;
+
+        // ============================================
+        // FUNCIÓ REUTILITZABLE
+        // ============================================
+        /**
+         * Configura un canvas per treballar amb devicePixelRatio
+         * @param {HTMLCanvasElement} canvas - Element canvas a configurar
+         * @param {number} widthCSS - Amplada en píxels CSS
+         * @param {number} heightCSS - Alçada en píxels CSS
+         * @returns {CanvasRenderingContext2D} Context 2D escalat correctament
+         */
+        function configurarCanvasAmbDPR(canvas, widthCSS, heightCSS) {
+            const dpr = window.devicePixelRatio || 1;
+
+            // Establir la mida CSS (mida visual al navegador)
+            canvas.style.width = widthCSS + 'px';
+            canvas.style.height = heightCSS + 'px';
+
+            // Establir la mida del buffer intern (resolució física real)
+            canvas.width = widthCSS * dpr;
+            canvas.height = heightCSS * dpr;
+
+            // Obtenir el context i escalar-lo per compensar l'augment de resolució
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            return ctx;
+        }
+
+        // ============================================
+        // FUNCIÓ PER DIBUIXAR EXEMPLES
+        // ============================================
+        /**
+         * Dibuixa diversos elements gràfics per mostrar diferències de qualitat
+         * @param {CanvasRenderingContext2D} ctx - Context 2D on dibuixar
+         */
+        function dibuixarExemples(ctx) {
+            // Fons amb gradient
+            const gradient = ctx.createLinearGradient(0, 0, 400, 300);
+            gradient.addColorStop(0, '#f0f9ff');
+            gradient.addColorStop(1, '#e0f2fe');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Títol gran (aquí es nota més la diferència)
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 32px Arial';
+            ctx.fillText('Canvas DPR Test', 20, 50);
+
+            // Text petit (encara més evident)
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#475569';
+            ctx.fillText('Observa la nitidesa del text', 20, 80);
+            ctx.fillText('i les línies diagonals', 20, 100);
+
+            // Línies horitzontals i verticals
+            ctx.strokeStyle = '#0ea5e9';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(20, 120);
+            ctx.lineTo(380, 120);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(20, 130);
+            ctx.lineTo(20, 270);
+            ctx.stroke();
+
+            // Línies diagonals (les que més pateixen sense DPR)
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 150);
+            ctx.lineTo(200, 220);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(200, 150);
+            ctx.lineTo(50, 220);
+            ctx.stroke();
+
+            // Cercles amb contorn
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(300, 180, 40, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#c084fc';
+            ctx.beginPath();
+            ctx.arc(300, 180, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Rectangle amb ombra
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(250, 220, 80, 50);
+            ctx.shadowColor = 'transparent';
+
+            // Text informatiu petit
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px monospace';
+            ctx.fillText(`DPR: ${dpr.toFixed(2)}`, 20, 290);
+        }
+
+        // ============================================
+        // CONFIGURAR CANVAS INCORRECTE (sense DPR)
+        // ============================================
+        const canvasWrong = document.getElementById('canvas-wrong');
+        const ctxWrong = canvasWrong.getContext('2d');
+
+        // Només establim la mida CSS, sense ajustar el buffer intern
+        canvasWrong.style.width = '400px';
+        canvasWrong.style.height = '300px';
+        // El width i height ja estan definits a l'HTML (400x300)
+        // Això fa que el navegador estiri aquests píxels, creant borrositat
+
+        dibuixarExemples(ctxWrong);
+
+        // ============================================
+        // CONFIGURAR CANVAS CORRECTE (amb DPR)
+        // ============================================
+        const canvasCorrect = document.getElementById('canvas-correct');
+
+        // Utilitzem la nostra funció reutilitzable
+        const ctxCorrect = configurarCanvasAmbDPR(canvasCorrect, 400, 300);
+
+        dibuixarExemples(ctxCorrect);
+
+        // ============================================
+        // MISSATGE A LA CONSOLA
+        // ============================================
+        console.log('%c=== INFORMACIÓ CANVAS DPR ===', 'color: #667eea; font-size: 16px; font-weight: bold;');
+        console.log(`Device Pixel Ratio: ${dpr}`);
+        console.log(`Canvas SENSE DPR: ${canvasWrong.width}×${canvasWrong.height} píxels (buffer intern)`);
+        console.log(`Canvas AMB DPR: ${canvasCorrect.width}×${canvasCorrect.height} píxels (buffer intern)`);
+        console.log(`Mida CSS (visual): 400×300 píxels (ambdós)`);
+        console.log('\nEn pantalles Retina (DPR=2), el canvas correcte té 4 vegades més píxels!');
+    </script>
+</body>
+</html>

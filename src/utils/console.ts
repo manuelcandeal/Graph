@@ -1,5 +1,5 @@
 export type Something = number | string | boolean | object | null | undefined
-import { config } from '../config/app.config.js'
+import { config } from '../config/appConfig'
 
 export class Console {
   static log(...args: Something[]) {

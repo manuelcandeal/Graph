@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordenades Centrades al Canvas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #333;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .info {
+            background: #f0f7ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .coords {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .coord-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .coord-box h3 {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .coord-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-section {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-section h3 {
+            color: #80deea;
+            margin-bottom: 15px;
+        }
+
+        .code-section pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coordenades Centrades al Canvas</h1>
+        <p style="color: #666; margin-bottom: 20px;">
+            Sistema de coordenades amb l'origen (0,0) al centre del canvas i eix Y invertit (matemàtic)
+        </p>
+
+        <div class="info">
+            <strong>Mou el ratolí sobre el canvas per veure les coordenades</strong>
+            <p style="margin-top: 10px; color: #555;">
+                • <strong>Coordenades Canvas:</strong> (0,0) a la cantonada superior esquerra<br>
+                • <strong>Coordenades Centrades:</strong> (0,0) al centre, Y positiu cap amunt
+            </p>
+        </div>
+
+        <canvas id="canvas" width="600" height="400"></canvas>
+
+        <div class="coords">
+            <div class="coord-box">
+                <h3>Coordenades Canvas (original)</h3>
+                <div class="coord-value" id="canvas-coords">-</div>
+            </div>
+            <div class="coord-box">
+                <h3>Coordenades Centrades (transformades)</h3>
+                <div class="coord-value" id="centered-coords">-</div>
+            </div>
+        </div>
+
+        <!-- Funció principal -->
+        <div class="code-section">
+            <h3>📍 Funció: Coordenades Centrades → Canvas</h3>
+            <pre><span style="color: #ff9800;">/**
+ * Converteix coordenades centrades (0,0 al centre) a coordenades canvas
+ * @param {HTMLCanvasElement} canvas - Element canvas
+ * @param {number} x - Coordenada X centrada
+ * @param {number} y - Coordenada Y centrada (positiu cap amunt)
+ * @returns {{x: number, y: number}} Coordenades canvas
+ */</span>
+<span style="color: #80deea;">function</span> <span style="color: #ffeb3b;">centratACanvas</span>(canvas, x, y) {
+    <span style="color: #ff9800;">// Obtenir dimensions CSS del canvas</span>
+    <span style="color: #90caf9;">const</span> widthCSS = parseFloat(canvas.style.width) || canvas.width;
+    <span style="color: #90caf9;">const</span> heightCSS = parseFloat(canvas.style.height) || canvas.height;
+
+    <span style="color: #ff9800;">// Calcular el centre</span>
+    <span style="color: #90caf9;">const</span> centreX = widthCSS / <span style="color: #f48fb1;">2</span>;
+    <span style="color: #90caf9;">const</span> centreY = heightCSS / <span style="color: #f48fb1;">2</span>;
+
+    <span style="color: #ff9800;">// Transformar: translació + inversió de Y</span>
+    <span style="color: #80deea;">return</span> {
+        x: x + centreX,
+        y: centreY - y  <span style="color: #ff9800;">// Invertim Y perquè sigui matemàtic</span>
+    };
+}</pre>
+        </div>
+
+        <!-- Funció inversa -->
+        <div class="code-section">
+            <h3>🔄 Funció inversa: Canvas → Coordenades Centrades</h3>
+            <pre><span style="color: #ff9800;">/**
+ * Converteix coordenades canvas a coordenades centrades (0,0 al centre)
+ * @param {HTMLCanvasElement} canvas - Element canvas
+ * @param {number} x - Coordenada X canvas
+ * @param {number} y - Coordenada Y canvas
+ * @returns {{x: number, y: number}} Coordenades centrades
+ */</span>
+<span style="color: #80deea;">function</span> <span style="color: #ffeb3b;">canvasACentrat</span>(canvas, x, y) {
+    <span style="color: #ff9800;">// Obtenir dimensions CSS del canvas</span>
+    <span style="color: #90caf9;">const</span> widthCSS = parseFloat(canvas.style.width) || canvas.width;
+    <span style="color: #90caf9;">const</span> heightCSS = parseFloat(canvas.style.height) || canvas.height;
+
+    <span style="color: #ff9800;">// Calcular el centre</span>
+    <span style="color: #90caf9;">const</span> centreX = widthCSS / <span style="color: #f48fb1;">2</span>;
+    <span style="color: #90caf9;">const</span> centreY = heightCSS / <span style="color: #f48fb1;">2</span>;
+
+    <span style="color: #ff9800;">// Transformar: translació + inversió de Y</span>
+    <span style="color: #80deea;">return</span> {
+        x: x - centreX,
+        y: centreY - y  <span style="color: #ff9800;">// Invertim Y perquè sigui matemàtic</span>
+    };
+}</pre>
+        </div>
+
+        <!-- Exemple d'ús -->
+        <div class="code-section">
+            <h3>💡 Exemple d'ús</h3>
+            <pre><span style="color: #ff9800;">// Dibuixar un cercle al centre (0,0)</span>
+<span style="color: #90caf9;">const</span> puntCentrat = { x: <span style="color: #f48fb1;">0</span>, y: <span style="color: #f48fb1;">0</span> };
+<span style="color: #90caf9;">const</span> puntCanvas = centratACanvas(canvas, puntCentrat.x, puntCentrat.y);
+
+ctx.beginPath();
+ctx.arc(puntCanvas.x, puntCanvas.y, <span style="color: #f48fb1;">5</span>, <span style="color: #f48fb1;">0</span>, Math.PI * <span style="color: #f48fb1;">2</span>);
+ctx.fill();
+
+<span style="color: #ff9800;">// Dibuixar un punt a (100, 50) en coordenades centrades</span>
+<span style="color: #90caf9;">const</span> p2 = centratACanvas(canvas, <span style="color: #f48fb1;">100</span>, <span style="color: #f48fb1;">50</span>);
+ctx.fillRect(p2.x - <span style="color: #f48fb1;">2</span>, p2.y - <span style="color: #f48fb1;">2</span>, <span style="color: #f48fb1;">4</span>, <span style="color: #f48fb1;">4</span>);</pre>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURAR CANVAS AMB DPR
+        // ============================================
+        function configurarCanvasAmbDPR(canvas, widthCSS, heightCSS) {
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.style.width = widthCSS + 'px';
+            canvas.style.height = heightCSS + 'px';
+
+            canvas.width = widthCSS * dpr;
+            canvas.height = heightCSS * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            return ctx;
+        }
+
+        // ============================================
+        // FUNCIONS DE TRANSFORMACIÓ DE COORDENADES
+        // ============================================
+
+        /**
+         * Converteix coordenades centrades (0,0 al centre) a coordenades canvas
+         * @param {HTMLCanvasElement} canvas - Element canvas
+         * @param {number} x - Coordenada X centrada
+         * @param {number} y - Coordenada Y centrada (positiu cap amunt)
+         * @returns {{x: number, y: number}} Coordenades canvas
+         */
+        function centratACanvas(canvas, x, y) {
+            // Obtenir dimensions CSS del canvas
+            const widthCSS = parseFloat(canvas.style.width) || canvas.width;
+            const heightCSS = parseFloat(canvas.style.height) || canvas.height;
+
+            // Calcular el centre
+            const centreX = widthCSS / 2;
+            const centreY = heightCSS / 2;
+
+            // Transformar: translació + inversió de Y
+            return {
+                x: x + centreX,
+                y: centreY - y  // Invertim Y perquè sigui matemàtic
+            };
+        }
+
+        /**
+         * Converteix coordenades canvas a coordenades centrades (0,0 al centre)
+         * @param {HTMLCanvasElement} canvas - Element canvas
+         * @param {number} x - Coordenada X canvas
+         * @param {number} y - Coordenada Y canvas
+         * @returns {{x: number, y: number}} Coordenades centrades
+         */
+        function canvasACentrat(canvas, x, y) {
+            // Obtenir dimensions CSS del canvas
+            const widthCSS = parseFloat(canvas.style.width) || canvas.width;
+            const heightCSS = parseFloat(canvas.style.height) || canvas.height;
+
+            // Calcular el centre
+            const centreX = widthCSS / 2;
+            const centreY = heightCSS / 2;
+
+            // Transformar: translació + inversió de Y
+            return {
+                x: x - centreX,
+                y: centreY - y  // Invertim Y perquè sigui matemàtic
+            };
+        }
+
+        // ============================================
+        // CONFIGURAR I DIBUIXAR CANVAS
+        // ============================================
+        const canvas = document.getElementById('canvas');
+        const ctx = configurarCanvasAmbDPR(canvas, 600, 400);
+
+        function dibuixarCanvas() {
+            // Netejar canvas
+            ctx.clearRect(0, 0, 600, 400);
+
+            // Fons suau
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, 600, 400);
+
+            // Obtenir dimensions CSS
+            const width = parseFloat(canvas.style.width);
+            const height = parseFloat(canvas.style.height);
+            const centreX = width / 2;
+            const centreY = height / 2;
+
+            // Dibuixar graella
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+
+            // Línies verticals
+            for (let x = 0; x <= width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            // Línies horitzontals
+            for (let y = 0; y <= height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Dibuixar eixos principals
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+
+            // Eix X (horitzontal)
+            ctx.beginPath();
+            ctx.moveTo(0, centreY);
+            ctx.lineTo(width, centreY);
+            ctx.stroke();
+
+            // Eix Y (vertical)
+            ctx.beginPath();
+            ctx.moveTo(centreX, 0);
+            ctx.lineTo(centreX, height);
+            ctx.stroke();
+
+            // Dibuixar fletxes dels eixos
+            ctx.fillStyle = '#3b82f6';
+
+            // Fletxa X (dreta)
+            ctx.beginPath();
+            ctx.moveTo(width - 10, centreY - 5);
+            ctx.lineTo(width, centreY);
+            ctx.lineTo(width - 10, centreY + 5);
+            ctx.fill();
+
+            // Fletxa Y (amunt - invertida perquè Y creix cap avall en canvas)
+            ctx.beginPath();
+            ctx.moveTo(centreX - 5, 10);
+            ctx.lineTo(centreX, 0);
+            ctx.lineTo(centreX + 5, 10);
+            ctx.fill();
+
+            // Etiquetes dels eixos
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('X', width - 20, centreY - 10);
+            ctx.fillText('Y', centreX + 10, 20);
+            ctx.fillText('(0,0)', centreX + 10, centreY - 10);
+
+            // Dibuixar alguns punts d'exemple en coordenades centrades
+            const exemples = [
+                { x: 0, y: 0, color: '#ef4444', label: 'Centre (0,0)' },
+                { x: 100, y: 50, color: '#10b981', label: '(100,50)' },
+                { x: -150, y: 80, color: '#f59e0b', label: '(-150,80)' },
+                { x: 200, y: -100, color: '#8b5cf6', label: '(200,-100)' },
+                { x: -100, y: -50, color: '#06b6d4', label: '(-100,-50)' }
+            ];
+
+            exemples.forEach(punt => {
+                const canvasCoord = centratACanvas(canvas, punt.x, punt.y);
+
+                // Dibuixar punt
+                ctx.fillStyle = punt.color;
+                ctx.beginPath();
+                ctx.arc(canvasCoord.x, canvasCoord.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Dibuixar etiqueta
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '12px Arial';
+                ctx.fillText(punt.label, canvasCoord.x + 10, canvasCoord.y - 10);
+            });
+        }
+
+        dibuixarCanvas();
+
+        // ============================================
+        // INTERACTIVITAT: MOSTRAR COORDENADES AMB EL RATOLÍ
+        // ============================================
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+
+            // Coordenades canvas (relatives al canvas)
+            const canvasX = event.clientX - rect.left;
+            const canvasY = event.clientY - rect.top;
+
+            // Convertir a coordenades centrades
+            const centrades = canvasACentrat(canvas, canvasX, canvasY);
+
+            // Mostrar coordenades
+            document.getElementById('canvas-coords').textContent =
+                `(${canvasX.toFixed(0)}, ${canvasY.toFixed(0)})`;
+            document.getElementById('centered-coords').textContent =
+                `(${centrades.x.toFixed(0)}, ${centrades.y.toFixed(0)})`;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            document.getElementById('canvas-coords').textContent = '-';
+            document.getElementById('centered-coords').textContent = '-';
+        });
+
+        // ============================================
+        // LOG A LA CONSOLA
+        // ============================================
+        console.log('%c=== FUNCIONS DE COORDENADES CENTRADES ===', 'color: #667eea; font-size: 16px; font-weight: bold;');
+        console.log('Prova les funcions:');
+        console.log('• centratACanvas(canvas, 0, 0) =>', centratACanvas(canvas, 0, 0));
+        console.log('• centratACanvas(canvas, 100, 50) =>', centratACanvas(canvas, 100, 50));
+        console.log('• canvasACentrat(canvas, 300, 200) =>', canvasACentrat(canvas, 300, 200));
+    </script>
+</body>
+</html>
